@@ -1,6 +1,6 @@
 {
   "name": "msg-router",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Simple intermediate layer router for data messages in JSON format",
   "main": "index.js",
   "directories": {
@@ -31,5 +31,6 @@
   },
   "homepage": "https://github.com/lastuniverse/msg-router#readme",
   "dependencies": {
+    "path-to-regex": "^1.0.1"
   }
 }
