@@ -1,10 +1,4 @@
-# msg-router
-Simple intermediate layer router for data messages in JSON format
-
-
-## usage
-```
-const MsgRouter = require('msg-router');
+const MsgRouter = require('../../msg-router');
 
 
 /*************************************** */
@@ -20,7 +14,7 @@ route_aaa.use((msg, next) => {
 });
 
 
-route_aaa.use('/aaa/bbb', route_bbb);
+route_aaa.use('/:aaa/:bbb', route_bbb);
 
 route_aaa.use('/aaa',(msg, next) => {
   console.log('route_aaa', 1, msg);
@@ -28,7 +22,7 @@ route_aaa.use('/aaa',(msg, next) => {
 });
 
 route_aaa.use('/aaa/:Aparam*',(msg, next) => {
-  console.log('route_aaa', 1, msg);
+  console.log('route_aaa', 2, msg);
   next();
 });
 
@@ -66,7 +60,7 @@ route_ccc.use((msg, next) => {
   next();
 });
 
-route_ccc.use('/:Cparam', (msg, next) => {
+route_ccc.use('/:Cparam*', (msg, next) => {
   console.log('route_ccc', 1, msg);
   next();
 });
@@ -79,5 +73,4 @@ route_ccc.use((err, msg, next) => {
 
 /*************************************** */
 // route_aaa.process({ targetPath: '/aaa', data: 'aaa' });
-route_aaa.process({ targetPath: '/aaa/bbb/ccc', data: 'aaa' });
-```
+route_aaa.process({ targetPath: '/aaa/bbb/ccc', data: {} });

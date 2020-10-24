@@ -41,7 +41,8 @@ class MsgRouter {
     if (!path) path = this.separator;
     const self = this;    
     const parser = (path === this.separator) ? ({ match: () => ({}) }) : new PathToRegex(path, { separators: this.separator, toEnd: false });
-    
+
+    const tokens = path.split(self.separator).filter(a=>a);
 
     handlers.forEach(handler=>{
       if(typeof handler !== "function" && !(handler instanceof MsgRouter))
@@ -54,21 +55,10 @@ class MsgRouter {
           // контекст данной вункции переопределяется в методе .process(...)
 
           const params = parser.match(this.message.targetPath);
-        //   const list = this.message.targetPath.split(self.separator).filter(a=>a);
-        //   console.log(this.message.targetPath, params, list, path, parser.regexp)
-
-        //   const first = list.shift();
 
           const nextitem = self.handlers[count+1];
           const cb = nextitem?nextitem.next.bind(this):this.cbEnd;
 
-          const message = { ...this.message };
-          message.targetPath = message.targetPath.slice(path.length);
-          // console.log(message.targetPath, path.length, path, params,parser.regexp);
-      
-
-          
-        //   if (!params && !parser.match(first)) return cb();
           if (!params) return cb();
 
           if(error){
@@ -85,11 +75,13 @@ class MsgRouter {
 
           }else{
             if (handler instanceof MsgRouter) {
-            //   const message = { ...this.message };
-            // //   message.targetPath = list.join(self.separator);
-            //   message.targetPath = message.targetPath.slice(0, path.length);
-            //   console.log(message.targetPath);
-              
+              const message = { ...this.message };
+              const list = message.targetPath
+                .split(self.separator)
+                .filter(a=>a);
+              list.splice(0,tokens.length)
+              message.targetPath = list.join(self.separator);
+           
               handler.process(message, cb);
             }else if (typeof handler === 'function'&& handler.length<3) {
               try {
@@ -135,81 +127,3 @@ class MsgRouter {
 
 
 module.exports = exports = MsgRouter;
-
-
-
-
-
-
-const route_aaa = new MsgRouter();
-const route_bbb = new MsgRouter();
-const route_ccc = new MsgRouter();
-
-// route_aaa.use((msg, next) => {
-//   console.log('route_aaa', 0, msg);
-//   next();
-// });
-
-
-// route_aaa.use('/aaa/bbb', route_bbb);
-
-// route_aaa.use('/aaa',(msg, next) => {
-//   console.log('route_aaa', 1, msg);
-//   next();
-// });
-
-// route_aaa.use('/aaa/Aparam',(msg, next) => {
-//   console.log('route_aaa', 1, msg);
-//   next();
-// });
-
-
-// route_aaa.use((err, msg, next) => {
-//   console.log('route_aaa', "ERROR", err, msg);
-//   next();
-// });
-
-// // /*************************************** */
-
-// route_bbb.use((msg, next) => {
-//   console.log('route_bbb', 0, msg);
-//   // throw 456;
-//   next();
-// });
-
-// route_bbb.use('/ccc', route_ccc);
-
-// route_bbb.use(':Bparam*',(msg, next)=>{
-//   console.log("route_bbb", 1, msg);
-//   next();
-// });
-
-// route_bbb.use((err, msg, next) => {
-//   console.log('route_bbb', "ERROR", err, msg);
-//   next(err);
-// });
-
-
-// // /*************************************** */
-
-// route_ccc.use((msg, next) => {
-//   console.log('route_ccc', 0, msg);
-//   next();
-// });
-
-// route_ccc.use('/:action', (msg, next) => {
-//   console.log('route_ccc', 1, msg);
-//   next();
-// });
-
-// route_ccc.use((err, msg, next) => {
-//   console.log('route_ccc', "ERROR", err, msg);
-//   next(err);
-// });
-
-
-
-
-
-// route_aaa.process({ targetPath: '/aaa', data: 'aaa' });
-// route_aaa.process({ targetPath: '/aaa/bbb/ccc', data: 'aaa' });
