@@ -36,13 +36,14 @@ router.use("/weather", routerForWeather);
 
 
 // the error handler must be the last in the handler chain. 
-// The error handler function, unlike a regular handler, takes three arguments:
+// The error handler function, unlike a regular handler, takes 3 arguments:
 //  error   - an object with information about the error
-//  message - the message, the processing of which led to the generation of an exception
-//  next    - a function whose call will result in the transfer of control to the next 
-//            handler (if when calling next (argument) the argument is not defined, 
-//            then the next handler will be called, if defined, then the next error 
-//            handler will be called
+//  message - the message, the processing of which led to the generation of 
+//            an exception
+//  next    - a function whose call will result in the transfer of control 
+//            to the next handler (if when calling next (argument) the 
+//            argument is not defined then the next handler will be called,
+//            if defined, then the next error handler will be called
 router.use((err, msg, next) => {
     // тут можно обработать ошибки
     console.log('bot.main.js', 0, msg.ctx.text);
@@ -78,10 +79,11 @@ const router = new MsgRouter();
 
 // handler argument to / help command
 router.use("/:args*", (msg, next) => {
-    // this handler is called for all messages starting with "help" or "/help"
-    // command arguments will be in an array in msg.params.args
-    // for a more complete understanding of the syntax used 
-    // for path see the module description https://www.npmjs.com/package/path-to-regex
+    // this handler is called for all messages starting with "help" or 
+    // "/help" command arguments will be in an array in msg.params.args
+    // for a more complete understanding of the syntax used for path
+    // see the module description:
+    // https://www.npmjs.com/package/path-to-regex
 
     ...
     your handler code
@@ -90,19 +92,21 @@ router.use("/:args*", (msg, next) => {
     // we can also reply to the user with msg.ctx.reply ("...")
     msg.ctx.reply("Српавку еще не завезли");
     
-    // call next (); if we want to transfer processing to the next handlers. 
-    // If next (argument); will be called with an argument, this will ignore
-    // subsequent handlers and the next error handler will be called.
-    // You can achieve the same behavior by calling an error with throw
+    // call next (); if we want to transfer processing to the next 
+    // handlers. If next (argument); will be called with an argument,
+    // this will ignore subsequent handlers and the next error handler
+    // will be called. You can achieve the same behavior by calling an
+    // error with throw
     next();
 });
 
 
 // Error handler
 router.use((err, msg, next) => {
-    // This handler will be called when an error occurs in the code of the previous 
-    // handlers of this router, as well as its sub-routers if you send an error 
-    // in their error handlers with the next (error) command
+    // This handler will be called when an error occurs in the code of
+    // the previous handlers of this router, as well as its sub-routers
+    // if you send an error in their error handlers with the
+    // next(error) command.
     ...
     your error handler code
     ... 
