@@ -70,8 +70,7 @@ bot.launch()
 
 ```
 
-
-файлы роутеров (stc/routers/command.help.js stc/routers/command.weather.js) будут примерно такими:
+the router files (src/routers/command.help.js and src/routers/command.weather.js) will be something like this:
 ```javascript
 const MsgRouter = require('msg-router');
 const router = new MsgRouter();
