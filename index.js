@@ -40,7 +40,7 @@ class MsgRouter {
     if (!handlers.length) return null;
     if (!path) path = this.separator;
     const self = this;    
-    const parser = (path === this.separator) ? ({ match: () => ({}) }) : new PathToRegex(path, { separators: this.separator, toEnd: false });
+    const parser = (path === this.separator) ? ({ match: () => ({}) }) : new PathToRegex(path, { separators: this.separator, case: false, toEnd: false });
 
     const tokens = path.split(self.separator).filter(a=>a);
 

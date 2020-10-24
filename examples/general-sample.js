@@ -1,7 +1,7 @@
 const MsgRouter = require('../../msg-router');
 
 
-/*************************************** */
+// /*************************************** */
 const route_aaa = new MsgRouter();
 const route_bbb = new MsgRouter();
 const route_ccc = new MsgRouter();
@@ -72,5 +72,7 @@ route_ccc.use((err, msg, next) => {
 
 
 /*************************************** */
-// route_aaa.process({ targetPath: '/aaa', data: 'aaa' });
+route_aaa.process({ targetPath: '/aaa', data: 'aaa' });
 route_aaa.process({ targetPath: '/aaa/bbb/ccc', data: {} });
+
+
