@@ -1,6 +1,6 @@
 {
   "name": "msg-router",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Simple intermediate layer router for data messages in JSON format",
   "main": "index.js",
   "directories": {
