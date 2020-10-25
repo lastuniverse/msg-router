@@ -59,7 +59,7 @@ class MsgRouter {
           const nextitem = self.handlers[count+1];
           const cb = nextitem?nextitem.next.bind(this):this.cbEnd;
 
-          if (!params) return cb();
+          if (!params) return cb(error);
 
           if(error){
             
@@ -90,7 +90,7 @@ class MsgRouter {
                 cb(e);
               }
             }else{
-              cb();
+              cb(error);
             }
           }
         }
