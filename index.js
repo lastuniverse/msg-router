@@ -57,7 +57,11 @@ class MsgRouter {
           const params = parser.match(this.message.targetPath);
 
           const nextitem = self.handlers[count+1];
-          const cb = nextitem?nextitem.next.bind(this):this.cbEnd;
+          const cb =  (...args)=>{
+            setImmediate(()=>{
+              (nextitem?nextitem.next.bind(this):this.cbEnd)(...args);
+            })
+          }
 
           if (!params) return cb(error);
 
