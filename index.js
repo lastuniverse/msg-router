@@ -14,11 +14,11 @@ class MsgRouter {
    */
   constructor(separator = '/') {
     this.separator = separator;
-    this.handlers =[];
-    this.count=0;
+    this.handlers = [];
+    this.count = 0;
     // this.parser = new pathToRegex(':path*', { separators: '/.' });
   }
-  
+
   /**
    * Установить middleware
    * @param {String} path   путь по аналогии с express-ом (реализовано с использованием модуля path-to-regex)
@@ -33,100 +33,100 @@ class MsgRouter {
    */
   use(path, ...handlers) {
 
-    if (typeof path === 'function') {
+    if (typeof path === 'function' || path instanceof MsgRouter) {
       handlers.push(path);
       path = this.separator;
     }
     if (!handlers.length) return null;
     if (!path) path = this.separator;
-    const self = this;    
+    const self = this;
     const parser = (path === this.separator) ? ({ match: () => ({}) }) : new PathToRegex(path, { separators: this.separator, case: false, toEnd: false });
 
-    const tokens = path.split(self.separator).filter(a=>a);
+    const tokens = path.split(self.separator).filter(a => a);
 
-    handlers.forEach(handler=>{
-      if(typeof handler !== "function" && !(handler instanceof MsgRouter))
+    handlers.forEach(handler => {
+      if (typeof handler !== "function" && !(handler instanceof MsgRouter))
         return null;
 
-        // создали замыкание на index текущего обработчика
-        let count = this.count;
+      // создали замыкание на index текущего обработчика
+      let count = this.count;
 
-        function next(error){
-          // контекст данной вункции переопределяется в методе .process(...)
+      function next(error) {
+        // контекст данной вункции переопределяется в методе .process(...)
 
-          const params = parser.match(this.message.targetPath);
+        const params = parser.match(this.message.targetPath);
 
-          const nextitem = self.handlers[count+1];
-          const cb =  (...args)=>{
-            setImmediate(()=>{
-              (nextitem?nextitem.next.bind(this):this.cbEnd)(...args);
-            })
+        const nextitem = self.handlers[count + 1];
+        const cb = (...args) => {
+          setImmediate(() => {
+            (nextitem ? nextitem.next.bind(this) : this.cbEnd)(...args);
+          })
+        }
+
+        if (!params) return cb(error);
+
+        if (error) {
+
+          if (typeof handler === 'function' && handler.length === 3) {
+            try {
+              handler(error, { ...this.message, params: { ...params } }, cb);
+            } catch (e) {
+              cb(e);
+            }
+          } else {
+            cb(error)
           }
 
-          if (!params) return cb(error);
+        } else {
+          if (handler instanceof MsgRouter) {
+            const message = { ...this.message };
+            const list = message.targetPath
+              .split(self.separator)
+              .filter(a => a);
+            list.splice(0, tokens.length)
+            message.targetPath = list.join(self.separator);
 
-          if(error){
-            
-            if (typeof handler === 'function'&& handler.length===3) {
-              try {
-                handler(error,{ ...this.message, params: {...params} }, cb);  
-              } catch (e) {
-                cb(e);
-              }
-            }else{
-              cb(error)
+            handler.process(message, cb);
+          } else if (typeof handler === 'function' && handler.length < 3) {
+            try {
+              handler({ ...this.message, params }, cb);
+            } catch (e) {
+              cb(e);
             }
-
-          }else{
-            if (handler instanceof MsgRouter) {
-              const message = { ...this.message };
-              const list = message.targetPath
-                .split(self.separator)
-                .filter(a=>a);
-              list.splice(0,tokens.length)
-              message.targetPath = list.join(self.separator);
-           
-              handler.process(message, cb);
-            }else if (typeof handler === 'function'&& handler.length<3) {
-              try {
-                handler({ ...this.message, params }, cb);
-              } catch (e) {
-                cb(e);
-              }
-            }else{
-              cb(error);
-            }
+          } else {
+            cb(error);
           }
         }
-        
+      }
 
-        if(!this.isSetStart){
-          this.isSetStart = true;
-          this.start = next;
-        }
 
-        this.handlers[this.count]={
-          handler,
-          parser,
-          next
-        }
-  
-        this.count++;
-   
-      
+      if (!this.isSetStart) {
+        this.isSetStart = true;
+        this.start = next;
+      }
+
+      this.handlers[this.count] = {
+        handler,
+        parser,
+        next
+      }
+
+      this.count++;
+
+
     });
   }
   /**
    * Принимает на обработку объект сообщения
    * @param {Object} message Обрабатываемый объект, должен содержать свойство targetPath
    */
-  process(message,cbEnd=()=>{}) {
+  process(message, cbEnd = () => { }) {
     if (!message && !message.targetPath) return cbEnd();
     if (!this.handlers.length) return cbEnd();
     const first = this.handlers[0];
-    const start = first.next.bind({message,cbEnd});
+    const start = first.next.bind({ message, cbEnd });
     start();
-  }  
+  }
 }
 
 
