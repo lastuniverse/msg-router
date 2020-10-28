@@ -57,9 +57,11 @@ class MsgRouter {
         const params = parser.match(this.message.targetPath);
 
         const nextitem = self.handlers[count + 1];
+        const targetPath = this.message.targetPath;
         const cb = (...args) => {
           setImmediate(() => {
-            (nextitem ? nextitem.next.bind(this) : this.cbEnd)(...args);
+            (nextitem ? nextitem.next.bind(this) : this.next)(...args);
+            this.message.targetPath = targetPath;
           })
         }
 
@@ -69,7 +71,9 @@ class MsgRouter {
 
           if (typeof handler === 'function' && handler.length === 3) {
             try {
-              handler(error, { ...this.message, params: { ...params } }, cb);
+              this.message.params = params;
+              handler(error, this.message, cb);
+              // handler(error, { ...this.message, params: { ...params } }, cb);
             } catch (e) {
               cb(e);
             }
@@ -79,17 +83,19 @@ class MsgRouter {
 
         } else {
           if (handler instanceof MsgRouter) {
-            const message = { ...this.message };
-            const list = message.targetPath
+            // const message = { ...this.message };
+            const list = this.message.targetPath
               .split(self.separator)
               .filter(a => a);
             list.splice(0, tokens.length)
-            message.targetPath = list.join(self.separator);
+            this.message.targetPath = list.join(self.separator);
 
-            handler.process(message, cb);
+            handler.process(this.message, cb);
           } else if (typeof handler === 'function' && handler.length < 3) {
             try {
-              handler({ ...this.message, params }, cb);
+              this.message.params = params;
+              handler(this.message, cb);
+              // handler({ ...this.message, params }, cb);
             } catch (e) {
               cb(e);
             }
@@ -120,11 +126,12 @@ class MsgRouter {
    * Принимает на обработку объект сообщения
    * @param {Object} message Обрабатываемый объект, должен содержать свойство targetPath
    */
-  process(message, cbEnd = () => { }) {
-    if (!message && !message.targetPath) return cbEnd();
-    if (!this.handlers.length) return cbEnd();
+  process(message, next = () => { }) {
+    if (!message && !message.targetPath) return next();
+    if (!this.handlers.length) return next();
+
     const first = this.handlers[0];
-    const start = first.next.bind({ message, cbEnd });
+    const start = first.next.bind({ message, next });
     start();
   }
 }
