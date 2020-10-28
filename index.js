@@ -53,15 +53,21 @@ class MsgRouter {
 
       function next(error) {
         // контекст данной вункции переопределяется в методе .process(...)
+        const nextitem = self.handlers[count + 1];
+
+        console.log(this.message.targetPath, self.handlers[count].parser.path, nextitem.parser.path)
+
 
         const params = parser.match(this.message.targetPath);
 
-        const nextitem = self.handlers[count + 1];
-        const targetPath = this.message.targetPath;
-        const cb = (...args) => {
+
+
+        const cb = (err, isRestorePath) => {
+          const targetPath = this.message.targetPath;
           setImmediate(() => {
-            (nextitem ? nextitem.next.bind(this) : this.next)(...args);
-            this.message.targetPath = targetPath;
+            (nextitem ? nextitem.next.bind(this) : this.next)(err);
+            if (isRestorePath)
+              this.message.targetPath = targetPath;
           })
         }
 
@@ -127,11 +133,11 @@ class MsgRouter {
    * @param {Object} message Обрабатываемый объект, должен содержать свойство targetPath
    */
   process(message, next = () => { }) {
-    if (!message && !message.targetPath) return next();
-    if (!this.handlers.length) return next();
+    if (!message && !message.targetPath) return next(null, true);
+    if (!this.handlers.length) return next(null, true);
 
     const first = this.handlers[0];
-    const start = first.next.bind({ message, next });
+    const start = first.next.bind({ message, next: e => next(e, true) });
     start();
   }
 }
