@@ -55,7 +55,7 @@ class MsgRouter {
         // контекст данной вункции переопределяется в методе .process(...)
         const nextitem = self.handlers[count + 1];
 
-        console.log(this.message.targetPath, self.handlers[count].parser.path, nextitem.parser.path)
+        // console.log(this.message.targetPath, self.handlers[count].parser.path, nextitem.parser.path)
 
 
         const params = parser.match(this.message.targetPath);
